@@ -36,6 +36,11 @@ class User:
     def __lt__(self, other):
         return self.total_reactions < other.total_reactions
 
+    def del_user(self):
+        self.status = "deleted"
+        for post in self.posts:
+            post.status = "deleted"
+
     @staticmethod
     def check_email_validity(email: str) -> bool:
         return (

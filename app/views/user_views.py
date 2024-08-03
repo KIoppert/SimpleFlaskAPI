@@ -132,6 +132,6 @@ def leaderboard():
 @app.delete("/users/<int:user_id>")
 def delete_user(user_id):
     if 0 <= user_id < len(USERS):
-        USERS[user_id].status = "deleted"
+        USERS[user_id].del_user()
         return Response(status=HTTPStatus.NO_CONTENT)
     return Response(status=HTTPStatus.NOT_FOUND)

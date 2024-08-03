@@ -53,6 +53,18 @@ def set_reaction_on_post(post_id):
     return Response(status=HTTPStatus.OK)
 
 
+@app.get("/posts/<int:post_id>")
+def get_post(post_id):
+    if 0 <= post_id < len(POSTS):
+        post = POSTS[post_id]
+        return Response(
+            json.dumps(post.to_json()),
+            status=HTTPStatus.OK,
+            mimetype="application/json",
+        )
+    return Response(status=HTTPStatus.NOT_FOUND)
+
+
 @app.delete("/posts/<int:post_id>")
 def delete_post(post_id):
     if 0 <= post_id < len(USERS):
