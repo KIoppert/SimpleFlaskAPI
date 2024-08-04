@@ -1,11 +1,26 @@
 import random
+import threading
+import time
 
+import pytest
 import requests
 import faker
+from app import app
 
 fake = faker.Faker("ru_RU")
 ENDPOINT = "http://127.0.0.1:5000"
 
+@pytest.fixture(scope="session", autouse=True)
+def setup():
+    def run_app():
+        app.run()
+
+    thread = threading.Thread(target=run_app)
+    thread.daemon = True
+    thread.start()
+    time.sleep(1)
+
+    yield
 
 def create_user_payload():
     n = fake.name().split()
