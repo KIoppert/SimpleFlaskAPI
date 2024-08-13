@@ -1,0 +1,29 @@
+<nav class="navbar navbar-expand bg-dark navbar-dark p-25">
+  <div class="container-fluid">
+    <a class="navbar-brand fs-2" href={{url_for('index')}}>KlopWeb</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse position-relative" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 fs-5">
+        <li class="nav-item">
+          <a class="nav-link active me-3" href={{ url_for('get_users_for_site') }}>Пользователи</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active me-3" href={{ url_for('get_posts_for_site') }}>Посты</a>
+        </li>
+        <li class="nav-item me-3 position-relative">
+          <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Действия</a>
+          <ul class="dropdown-menu dropdown-menu-dark position-absolute" style="top: 55px; left: -85px;">
+            <li><a class="dropdown-item" href={{ url_for('site_user_create') }}>Создать пользователя</a></li>
+            <li><a class="dropdown-item" href="#">Создать пост</a></li>
+            <li><a class="dropdown-item" href="#">Поставить реакцию на пост</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">#</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

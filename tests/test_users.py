@@ -28,7 +28,6 @@ def setup():
     thread.daemon = True
     thread.start()
     time.sleep(1)
-
     yield
 
 
@@ -144,6 +143,7 @@ def test_user_leaderboard():
         response = requests.get(f"{ENDPOINT}/users/{user_id}")
         assert response.status_code == 200
         assert response.json()["total_reactions"] == reactions
+    time.sleep(10)
     for i in users:
         requests.delete(f"{ENDPOINT}/users/{i}")
     for i in posts:

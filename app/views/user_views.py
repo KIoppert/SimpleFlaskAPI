@@ -1,10 +1,19 @@
 import json
 
 from app.models.User import User
-from app import USERS, app, models
-from flask import request, Response
+from app import USERS, app, forms
+from flask import (
+    request,
+    Response,
+    render_template,
+    flash,
+    url_for,
+    get_flashed_messages,
+    redirect,
+)
 from http import HTTPStatus
 import matplotlib.pyplot as plt
+import requests
 
 
 @app.post("/users/create")
@@ -13,7 +22,7 @@ def create_user():
     first_name = data.get("first_name")
     last_name = data.get("last_name")
     email = data.get("email")
-    if any(email == user.email for user in USERS):
+    if any(email == user.email for user in USERS if user.status != "deleted"):
         return Response(
             "Email already exists",
             status=HTTPStatus.CONFLICT,
@@ -129,9 +138,75 @@ def leaderboard():
         return Response(status=HTTPStatus.BAD_REQUEST)
 
 
+@app.get("/site/users")
+def get_users_for_site():
+    return render_template("users.html", USERS=USERS)
+
+
+@app.route("/site/user/create", methods=["GET", "POST"])
+def site_user_create():
+    data = dict()
+    form = forms.UserCreateForm()
+    if form.validate_on_submit():
+        data["first_name"] = form.first_name.data
+        data["last_name"] = form.last_name.data
+        data["email"] = form.email.data
+        form.email.data = ""
+        form.first_name.data = ""
+        form.last_name.data = ""
+        response = requests.post(url_for("create_user", _external=True), json=data)
+        if response.status_code == 201:
+            flash("Пользователь успешно создан", "success")
+            return redirect(url_for("get_users_for_site"))
+        elif response.status_code == HTTPStatus.CONFLICT:
+            flash("Пользователь с таким email уже существует", "danger")
+            return redirect(url_for("site_user_create"))
+    return render_template("user_changes.html", form=form, flag=False)
+
+
+@app.get("/site/user")
+def get_user_for_site():
+    user_id = int(request.args.get("id"))
+    if not User.is_valid_id(user_id):
+        return render_template("404.html"), 404
+    user = USERS[user_id]
+    return render_template("user.html", user=user)
+
+
+@app.route("/site/user/edit", methods=["GET", "POST"])
+def site_user_edit():
+    user_id = int(request.args.get("id"))
+    if not User.is_valid_id(user_id):
+        return render_template("404.html"), 404
+    user = USERS[user_id]
+    data = dict()
+    form = forms.UserCreateForm()
+    if form.validate_on_submit():
+        data["first_name"] = form.first_name.data
+        data["last_name"] = form.last_name.data
+        data["email"] = form.email.data
+        form.email.data = ""
+        form.first_name.data = ""
+        form.last_name.data = ""
+        if any(
+            data["email"] == user.email
+            for user in USERS
+            if (user.status != "deleted" and user.id != user_id)
+        ):
+            flash("Пользователь с таким email уже существует", "danger")
+            return redirect(url_for("site_user_edit", id=user_id))
+        user.first_name = data["first_name"]
+        user.last_name = data["last_name"]
+        user.email = data["email"]
+        flash("Данные пользователя успешно изменены", "success")
+        return redirect(url_for("get_users_for_site"))
+    return render_template("user_changes.html", form=form, flag=True)
+
+
 @app.delete("/users/<int:user_id>")
 def delete_user(user_id):
     if 0 <= user_id < len(USERS):
         USERS[user_id].del_user()
+        flash("Пользователь удален", "danger")
         return Response(status=HTTPStatus.NO_CONTENT)
     return Response(status=HTTPStatus.NOT_FOUND)
