@@ -161,11 +161,13 @@ def site_user_create():
         elif response.status_code == HTTPStatus.CONFLICT:
             flash("Пользователь с таким email уже существует", "danger")
             return redirect(url_for("site_user_create"))
+    print(form.email)
     return render_template("user_changes.html", form=form, flag=False)
 
 
 @app.get("/site/user")
 def get_user_for_site():
+    print(url_for('set_reaction_on_post', post_id=1, id=2))
     user_id = int(request.args.get("id"))
     if not User.is_valid_id(user_id):
         return render_template("404.html"), 404
@@ -181,6 +183,10 @@ def site_user_edit():
     user = USERS[user_id]
     data = dict()
     form = forms.UserCreateForm()
+    if request.method == "GET":
+        form.first_name.data = user.first_name
+        form.last_name.data = user.last_name
+        form.email.data = user.email
     if form.validate_on_submit():
         data["first_name"] = form.first_name.data
         data["last_name"] = form.last_name.data
@@ -200,7 +206,7 @@ def site_user_edit():
         user.email = data["email"]
         flash("Данные пользователя успешно изменены", "success")
         return redirect(url_for("get_users_for_site"))
-    return render_template("user_changes.html", form=form, flag=True)
+    return render_template("user_changes.html", form=form, editing=True)
 
 
 @app.delete("/users/<int:user_id>")

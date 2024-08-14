@@ -45,17 +45,25 @@ def set_reaction_on_post(post_id):
             status=HTTPStatus.NOT_FOUND,
         )
     data = request.json
-    user_id = data.get("user_id")
+    user_id = int(data.get("user_id"))
     reaction = data.get("reaction")
     if not (0 <= user_id < len(USERS)):
+        flash("Автор реакции не найден", "danger")
         return Response(
             "Author of the reaction not found",
             status=HTTPStatus.NOT_FOUND,
+        )
+    if user_id == POSTS[post_id].author_id:
+        flash("Автор реакции не может быть автором поста", "danger")
+        return Response(
+            "Author of the reaction can't be the author of the post",
+            status=HTTPStatus.BAD_REQUEST,
         )
     post = POSTS[post_id]
     post.set_reaction(reaction)
     user = USERS[user_id]
     user.increase_reactions()
+    flash("Реакция успешно установлена", "success")
     return Response(status=HTTPStatus.OK)
 
 
@@ -73,7 +81,7 @@ def get_post(post_id):
 
 @app.get("/site/posts")
 def get_posts_for_site():
-    return render_template("posts.html", POSTS=POSTS)
+    return render_template("posts.html", POSTS=POSTS, user=None)
 
 
 @app.route("/site/post/create", methods=["GET", "POST"])
@@ -95,7 +103,7 @@ def site_post_create():
             flash("Пользователь не найден", "danger")
             return redirect(url_for("site_post_create"))
         return redirect(url_for("site_post_create"))
-    return render_template("post_create.html", form=form)
+    return render_template("post_changes.html", form=form, editing=False)
 
 
 @app.get('/site/post')
@@ -106,17 +114,50 @@ def get_post_for_site():
     post = POSTS[post_id]
     return render_template("post.html", post=post)
 
+
 @app.get("/site/user_posts")
 def get_user_posts_for_site():
     user_id = int(request.args.get('author_id'))
     if not User.is_valid_id(user_id):
         return render_template("404.html"), 404
     user_posts = [post for post in POSTS if post.author_id == user_id]
-    return render_template("posts.html", POSTS=user_posts)
+    return render_template("posts.html", POSTS=user_posts, user=USERS[user_id])
+
+
+@app.route("/site/post/edit", methods=["GET", "POST"])
+def site_post_edit():
+    post_id = int(request.args.get("id"))
+    if not Post.is_valid_id(post_id):
+        return render_template("404.html"), 404
+    post = POSTS[post_id]
+    data = dict()
+    form = forms.PostCreateForm()
+    if request.method == "GET":
+        form.author_id.data = post.author_id
+        form.text.data = post.text
+        form.title.data = post.title
+    if form.validate_on_submit():
+        data["author_id"] = form.author_id.data
+        data['title'] = form.title.data
+        data["text"] = form.text.data
+        form.author_id.data = ""
+        form.text.data = ""
+        form.title.data = ""
+        if not User.is_valid_id(int(data["author_id"])):
+            flash("Автор не найден", "danger")
+            return redirect(url_for("site_post_edit", id=post_id))
+        post.author_id = data["author_id"]
+        post.text = data["text"]
+        post.title = data['title']
+        flash("Данные поста успешно изменены", "success")
+        return redirect(url_for("get_posts_for_site"))
+    return render_template("post_changes.html", form=form, editing=True)
+
 
 @app.delete("/posts/<int:post_id>")
 def delete_post(post_id):
     if 0 <= post_id < len(USERS):
         POSTS[post_id].status = "deleted"
+        flash("Пост удален", "danger")
         return Response(status=HTTPStatus.NO_CONTENT)
     return Response(status=HTTPStatus.NOT_FOUND)

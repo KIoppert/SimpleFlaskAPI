@@ -21,22 +21,18 @@
             <th scope="col">Имя</th>
             <th scope="col">Фамилия</th>
             <th scope="col">Почта</th>
-            <th scope="col">Действия</th>
+            <th scope="col">Поставленных реакций</th>
         </tr>
         </thead>
         <tbody class="table-group-divider border-black border-top-4">
         {% for user in USERS %}
             {% if user.status != 'deleted' %}
-{#                todo remake users table #}
             <tr class="text-center clickable-row"
                 onclick="window.location='{{ url_for('get_user_for_site', id=user.id) }}'">
-                <td class="text-break" style="max-width: 150px">{{ user.first_name }}</td>
-                <td class="text-break" style="max-width: 150px">{{ user.last_name }}</td>
-                <td class="text-break" style="max-width: 150px">{{ user.email }}</td>
-                <td>
-                        {% include "del-btn.html" %}
-{#                    todo maybe will be better if there will be score + reactions #}
-                </td>
+                <td class="text-break" style="width: 30%">{{ user.first_name }}</td>
+                <td class="text-break" style="width: 30%">{{ user.last_name }}</td>
+                <td class="text-break" style="width: 30%">{{ user.email }}</td>
+                <td class="text-break" style="width: 10%">{{ user.total_reactions }}</td>
             </tr>
             {% endif %}
         {% endfor %}
