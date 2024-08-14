@@ -18,9 +18,7 @@
           <ul class="dropdown-menu dropdown-menu-dark position-absolute" style="top: 55px; left: -85px;">
             <li><a class="dropdown-item" href={{ url_for('site_user_create') }}>Создать пользователя</a></li>
             <li><a class="dropdown-item" href={{ url_for('site_post_create') }}>Создать пост</a></li>
-            <li><a class="dropdown-item" href="#">Поставить реакцию на пост</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">#</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('get_posts_for_site', reactInfo=True) }}">Поставить реакцию на пост</a></li>
           </ul>
         </li>
       </ul>

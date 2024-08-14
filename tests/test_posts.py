@@ -39,7 +39,7 @@ def create_user_payload():
 
 
 def create_post_payload(id):
-    return {"author_id": id, "text": fake.text()}
+    return {"author_id": id, "text": fake.text(), "title": fake.text()[:10]}
 
 
 def test_post_create():

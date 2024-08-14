@@ -130,8 +130,8 @@ def test_user_leaderboard():
         posts.append(response.json()["id"])
         reactions = random.randint(1, 10)
         for j in range(reactions):
-            requests.post(
-                f"{ENDPOINT}/posts/0/reaction",
+            r = requests.post(
+                f"{ENDPOINT}/posts/3/reaction",
                 json={"user_id": user_id, "reaction": "like"},
             )
         response = requests.get(

@@ -16,7 +16,6 @@ def create_post():
     author_id = int(data.get("author_id"))
     text = data.get("text")
     title = 'Без заголовка' if data.get("title") is None else data.get("title")
-    pprint.pprint(data)
     if author_id is None or not text:
         print(author_id, text)
         return Response(
@@ -53,12 +52,12 @@ def set_reaction_on_post(post_id):
             "Author of the reaction not found",
             status=HTTPStatus.NOT_FOUND,
         )
-    if user_id == POSTS[post_id].author_id:
-        flash("Автор реакции не может быть автором поста", "danger")
-        return Response(
-            "Author of the reaction can't be the author of the post",
-            status=HTTPStatus.BAD_REQUEST,
-        )
+    # if user_id == POSTS[post_id].author_id:
+    #     flash("Автор реакции не может быть автором поста", "danger")
+    #     return Response(
+    #         "Author of the reaction can't be the author of the post",
+    #         status=HTTPStatus.BAD_REQUEST,
+    #     )
     post = POSTS[post_id]
     post.set_reaction(reaction)
     user = USERS[user_id]
@@ -88,6 +87,9 @@ def get_posts_for_site():
 def site_post_create():
     data = dict()
     form = forms.PostCreateForm()
+    user_id = request.args.get('user_id')
+    if request.method == "GET" and user_id is not None:
+        form.author_id.data = user_id
     if form.validate_on_submit():
         data["author_id"] = form.author_id.data
         data['title'] = form.title.data
